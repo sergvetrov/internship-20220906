@@ -1,0 +1,15 @@
+@startuml
+actor       Client as Client
+participant Mobile_app as Mobile_app
+participant Service as Service
+
+Client -> Service: Authentication request(using BankID)
+activate Service
+Service --> Service: Generate QR-code
+Client -> Mobile_app: Open app
+Mobile_app -> Service: Scan QR-code\n(Send authentication token)
+deactivate Service
+Service --> Service: Verifying token
+Service --> Client: Authentication response
+Service --> Mobile_app: Authentication response
+@enduml
