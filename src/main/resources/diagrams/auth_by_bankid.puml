@@ -1,0 +1,33 @@
+@startuml
+
+actor Client
+participant "BankId app: \n1.Android App\n2.iOS App\n3.Windows App\n4.MacOS App " as BankIdApp
+participant "Our service" as OurService
+participant "BankId API" as BankIdAPI
+participant "BankId main server" as BankIdMainServer
+Client -> OurService: Authentication request (using BankID)
+activate OurService
+OurService -> BankIdAPI: Create Order to auth
+BankIdAPI <--> BankIdMainServer: create auth order
+OurService <-- BankIdAPI: autoStartToken, orderRef
+activate OurService
+Client <- OurService: autoStartToken (to open BankId App) or QR code
+
+note over Client, BankIdApp
+ Open BankId App to accept/cancel order
+end note
+Client -> BankIdApp: accept/cancel order
+activate BankIdApp
+BankIdApp <--> BankIdMainServer: accept/cancel order
+return order status
+
+note over OurService, BankIdAPI
+ Try to get order status every second
+end note
+OurService -> BankIdAPI: get status by "orderRef"
+BankIdAPI <--> BankIdMainServer: get status by "orderRef"
+OurService <-- BankIdAPI: order status
+deactivate OurService
+return status of authentification (success/failure)
+
+@enduml
