@@ -1,4 +1,4 @@
-package internship.vetrov;
+package internship.vetrov.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -11,6 +11,7 @@ public class AuthInfo {
 
     private String qrStartToken;
     private String qrStartSecret;
+
     public String getOrderRef() {
         return orderRef;
     }
@@ -25,9 +26,5 @@ public class AuthInfo {
 
     public String getQrStartSecret() {
         return qrStartSecret;
-    }
-
-    public void setOrderRef(String orderRef) {
-        this.orderRef = orderRef;
     }
 }
