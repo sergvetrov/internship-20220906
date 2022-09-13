@@ -22,7 +22,7 @@ public class RequestService {
     public AuthInfo getAuthInfo() {
         log.info("======Send Request [Start]========");
         String requestBody = "{\"endUserIp\": \"95.47.122.31\"}";//TODO: take IP from user
-        String url = "https://appapi2.bankid.com/rp/v5.1/auth";
+        String url = "https://appapi2.test.bankid.com/rp/v5.1/auth";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> httpEntity = new HttpEntity<>(requestBody, headers);
