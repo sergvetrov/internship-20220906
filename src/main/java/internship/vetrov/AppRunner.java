@@ -10,7 +10,7 @@ public class AppRunner {
 
     private static final Logger log = Logger.getLogger(AppRunner.class.getName());
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         log.info("Start main...");
         SpringApplication.run(AppRunner.class, args);
         log.info("Finish main...");

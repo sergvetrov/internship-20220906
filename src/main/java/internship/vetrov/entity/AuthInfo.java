@@ -6,9 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class AuthInfo {
 
     private String orderRef;
-
     private String autoStartToken;
-
     private String qrStartToken;
     private String qrStartSecret;
 

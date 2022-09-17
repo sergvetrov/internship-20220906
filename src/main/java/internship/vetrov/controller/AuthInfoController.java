@@ -1,52 +1,35 @@
 package internship.vetrov.controller;
 
-import internship.vetrov.entity.AuthInfo;
+import internship.vetrov.service.QRService;
 import internship.vetrov.service.RequestService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.awt.image.BufferedImage;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 @RestController
 public class AuthInfoController {
-    @Autowired
-    private RequestService requestService;
+    private final RequestService requestService;
+    private final Instant orderTime = Instant.now();
 
-    @RequestMapping("/auth")
-    public AuthInfo getAuthInfo() {
-        return requestService.getAuthInfo();
+    public AuthInfoController(RequestService requestService) {
+        this.requestService = requestService;
     }
 
-    @RequestMapping("/code")
-    void generateQRcodeData(HttpServletResponse response) throws IOException {
-        AuthInfo rpResponse = requestService.getAuthInfo();
-        String qrStartToken = rpResponse.getQrStartToken();
-        String qrStartSecret = rpResponse.getQrStartSecret();
+    @RequestMapping(path = "/code", produces = MediaType.IMAGE_PNG_VALUE)
+    public BufferedImage generateQRCodeData(
+            @RequestParam String qrStartToken,
+            @RequestParam String qrStartSecret,
+            @RequestParam String orderRef) throws Exception {
 
-        Instant orderTime = Instant.now();
-        String qrTime = Long.toString(orderTime.until(Instant.now(), ChronoUnit.SECONDS));
-        Mac mac;
-        try {
-            mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(qrStartSecret.getBytes(StandardCharsets.US_ASCII), "HmacSHA256"));
-            mac.update(qrTime.getBytes(StandardCharsets.US_ASCII));
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException(e);
+        String status = requestService.getCollectInfo(orderRef).getStatus();
+        if (!status.equals("pending")) {
+            throw new Exception(); //TODO: make other scenarios
         }
-
-        String qrAuthCode = String.format("%064x", new BigInteger(1, mac.doFinal()));
-        String qrData = String.join(".", "bankid", qrStartToken, qrTime, qrAuthCode);
-
-        response.sendRedirect("qr-code?url=" + qrData);
+        String qrData = QRService.generateQRdata(qrStartToken, qrStartSecret, orderTime);
+        return QRService.generateQRCode(qrData);
     }
 }
