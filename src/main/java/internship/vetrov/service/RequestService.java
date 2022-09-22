@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 @Service
@@ -27,7 +29,9 @@ public class RequestService {
         HttpEntity<String> httpEntity = setRequestEntity(requestBody, url);
 
         try {
-            return rt.postForObject(new URI(url), httpEntity, AuthInfo.class);
+            AuthInfo authInfo = rt.postForObject(new URI(url), httpEntity, AuthInfo.class);
+            QRService.addOrder(Objects.requireNonNull(authInfo).getOrderRef(), Instant.now());
+            return authInfo;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

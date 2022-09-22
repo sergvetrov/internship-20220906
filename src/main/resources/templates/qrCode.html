@@ -1,22 +1,26 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html">
     <title>QR-code</title>
 </head>
 <body>
-    <input id="code-url" type="hidden"
-           th:value="'/code?qrStartToken=' + ${qrStartToken} + '&qrStartSecret=' + ${qrStartSecret} + '&orderRef=' + ${orderRef}">
-    <img id="qr-img" width="420" height="420"/>
-
+<img id="qr-img" width="420" height="420"/>
 <script>
     const img = document.getElementById('qr-img');
-    const uri = document.getElementById('code-url').value;
-    img.setAttribute("src", uri);
 
-    setInterval(function() {
-        img.setAttribute("src", `${uri}&ts=${new Date().getTime()}`);
-    }, 1000);
+    function drawQR() {
+        fetch("/getQRData")
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                const imgUrl = `/code?qrData=${data}`;
+                img.setAttribute("src", imgUrl);
+            });
+    }
+
+    setInterval(drawQR, 1000);
+    drawQR();
 </script>
 </body>
 </html>

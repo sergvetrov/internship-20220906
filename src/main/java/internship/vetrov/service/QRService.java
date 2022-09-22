@@ -15,11 +15,21 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class QRService {
+    private static final ConcurrentHashMap<String, Instant> startOrder = new ConcurrentHashMap<>();
 
-    public static String generateQRdata(String qrStartToken, String qrStartSecret, Instant orderTime) {
-        String qrTime = Long.toString(orderTime.until(Instant.now(), ChronoUnit.SECONDS));
+    public static ConcurrentHashMap<String, Instant> getStartOrder() {
+        return startOrder;
+    }
+
+    public static void addOrder(String orderRef, Instant startOrderTime) {
+        startOrder.put(orderRef, startOrderTime);
+    }
+
+    public static String generateQRdata(String qrStartToken, String qrStartSecret, Instant startOrderTime) {
+        String qrTime = Long.toString(startOrderTime.until(Instant.now(), ChronoUnit.SECONDS));
         Mac mac;
         try {
             mac = Mac.getInstance("HmacSHA256");
