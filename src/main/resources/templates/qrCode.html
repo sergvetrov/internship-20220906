@@ -1,25 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <script type="text/javascript" async="" src="/main.js"></script>
     <title>QR-code</title>
 </head>
 <body>
-<img id="qr-img" width="420" height="420"/>
+<div class="parent">
+    <div id="image">
+        <img src="https://www.bankid.com/assets/logo-bank-id.svg" width="100" height="100" alt="">
+    </div>
+    <div class="text_color" id="welcome_message">
+        <p>Start the BankID app on your phone or tablet. <br>
+            Tab the QR code button in the app. <br>
+            Point the camera at the QR code below.<br>
+        </p>
+    </div>
+    <div id="qr_button">
+        <img id="qr-img" width="200" height="200"/>
+    </div>
+    <div id="desktop_app_button">
+        <a th:href="'bankid:///?autostarttoken=' + ${autoStartToken} + '&redirect=null'">Open BankID on this device</a>
+    </div>
+</div>
+
 <script>
     const img = document.getElementById('qr-img');
+    let interval;
 
     function drawQR() {
         fetch("/getQRData")
-            .then(response => response.text())
+            .then(response => response.json())
             .then(data => {
                 console.log(data);
-                const imgUrl = `/code?qrData=${data}`;
-                img.setAttribute("src", imgUrl);
+                if(data.collectInfo.status == "pending") {
+                    const imgUrl = `/code?qrData=${data.qrCode}`;
+                    img.setAttribute("src", imgUrl);
+                } else if(data.collectInfo.status == "complete") {
+                    window.location = `/resultAuth?personalNumber=${data.collectInfo.completionData.user.personalNumber}
+                    &name=${data.collectInfo.completionData.user.name}
+                    &givenName=${data.collectInfo.completionData.user.givenName}
+                    &surname=${data.collectInfo.completionData.user.surname}`;
+                    if(interval) clearInterval(interval);
+                }
             });
     }
-
-    setInterval(drawQR, 1000);
+    interval = setInterval(drawQR, 1000);
     drawQR();
 </script>
 </body>
